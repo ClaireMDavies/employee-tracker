@@ -1,7 +1,7 @@
-DROP DATABASE IF EXISTS employee_trackerDB;
-CREATE database employee_trackerDB;
+DROP DATABASE IF EXISTS employee_tracker;
+CREATE database employee_tracker;
 
-USE employee_trackerDB;
+USE employee_tracker;
 
 CREATE TABLE employees (
   id INT NOT NULL AUTO_INCREMENT,
@@ -15,7 +15,7 @@ CREATE TABLE employees (
 CREATE TABLE roles (
   id INT NOT NULL AUTO_INCREMENT,
   title VARCHAR(30) NOT NULL,
-  salary DECIMAL(5,2) NOT NULL,
+  salary DECIMAL(7,2) NOT NULL,
   department_id INT NOT NULL,
   PRIMARY KEY (id)
 );
