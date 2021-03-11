@@ -190,9 +190,7 @@ const updateDB = () => {
 const viewEmployees = () => {
     const query =
       'SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary, departments.name FROM ((employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.department_id=departments.id));';
-      
-      
-
+ 
     connection.query(query, (err, res) => {
       if (err) throw err;
       console.table(res)
@@ -201,7 +199,18 @@ const viewEmployees = () => {
   };
   
 
-// viewRoles();
+const viewRoles = () => {
+    const query =
+    'SELECT roles.id, roles.title, roles.salary, departments.name FROM roles INNER JOIN departments ON roles.department_id = departments.id;';
+
+  connection.query(query, (err, res) => {
+    if (err) throw err;
+    console.table(res)
+    runSearch();
+  });
+};
+
+
 // viewDepartments();
 // addEmployees()
 // addRoles()
