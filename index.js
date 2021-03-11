@@ -2,6 +2,7 @@ const inquirer = require("inquirer");
 const mySQL = require("mysql");
 const consoleTable = require("console.table");
 
+//creating connection to mySQL
 const connection = mySQL.createConnection({
 
     host:"localhost",
@@ -17,6 +18,7 @@ connection.connect((err) => {
     runSearch();
   });
 
+//inital prompts for iuser input
   const runSearch = () => {
     inquirer
       .prompt({
@@ -65,11 +67,12 @@ connection.connect((err) => {
         'Employees',
         'Roles',
         'Departments',
+        'Return to Main Menu',
         'Exit',
       ],
     })
     .then((answer) => {
-      switch (answer.action) {
+      switch (answer.viewing) {
         case 'Employees':
           viewEmployees();
           break;
@@ -81,22 +84,126 @@ connection.connect((err) => {
         case 'Departments':
           viewDepartments();
           break;
+
+        case 'Return to Main Menu':
+          runSearch();
+          break; 
  
         case 'Exit':
           connection.end();
           break;
 
         default:
-          console.log(`Invalid action: ${answer.action}`);
+          console.log(`Invalid action: ${answer.viewing}`);
           break;
       }
     });
 };
-   
-viewEmployees(); 
-viewRoles();
-viewDepartments();
 
+const addToDB = () => {
+    inquirer
+    .prompt({
+      name: 'adding',
+      type: 'list',
+      message: 'What would you like to add?',
+      choices: [
+        'Employees',
+        'Roles',
+        'Departments',
+        'Return to Main Menu',
+        'Exit',
+      ],
+    })
+    .then((answer) => {
+      switch (answer.adding) {
+        case 'Employees':
+          addEmployees();
+          break;
 
-addToDB();
-updateDB();
+        case 'Roles':
+          addRoles();
+          break;
+
+        case 'Departments':
+          addDepartments();
+          break;
+
+        case 'Return to Main Menu':
+          runSearch();
+          break; 
+ 
+        case 'Exit':
+          connection.end();
+          break;
+
+        default:
+          console.log(`Invalid action: ${answer.adding}`);
+          break;
+      }
+    });
+};
+
+const updateDB = () => {
+    inquirer
+    .prompt({
+      name: 'updating',
+      type: 'list',
+      message: 'What would you like to update?',
+      choices: [
+        'Employees',
+        'Roles',
+        'Departments',
+        'Return to Main Menu',
+        'Exit',
+      ],
+    })
+    .then((answer) => {
+      switch (answer.updating) {
+        case 'Employees':
+          updateEmployees();
+          break;
+
+        case 'Roles':
+          updateRoles();
+          break;
+
+        case 'Departments':
+          updateDepartments();
+          break;
+
+        case 'Return to Main Menu':
+          runSearch();
+          break; 
+ 
+        case 'Exit':
+          connection.end();
+          break;
+
+        default:
+          console.log(`Invalid action: ${answer.updating}`);
+          break;
+      }
+    });
+};
+// TO DO: create joins for each function to allow results to be displayed 
+// viewEmployees();
+const viewEmployees = () => {
+    const query =
+      'SELECT * FROM employees';
+    connection.query(query, (err, res) => {
+      if (err) throw err;
+      console.table(res)
+      runSearch();
+    });
+  };
+  
+
+// viewRoles();
+// viewDepartments();
+// addEmployees()
+// addRoles()
+// addDepartments()
+// updateEmployees()
+// updateRoles()
+// updateDepartments()
+
