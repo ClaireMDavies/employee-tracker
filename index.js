@@ -15,35 +15,90 @@ const connection = mySQL.createConnection({
 
 connection.connect((err) => {
     if (err) throw err;
-    runSearch();
+    mainMenu();
   });
 
 //inital prompts for iuser input
-  const runSearch = () => {
+  const mainMenu = () => {
     inquirer
       .prompt({
         name: 'action',
+        pageSize: 20,
         type: 'list',
-        message: 'What would you like to do with the employee tracker database?',
+        message: 'What would you like to do?',
         choices: [
-          'View',
-          'Add',
-          'Update',
-          'Exit',
+          'View all employees',
+          'View all employees by role',
+          'View all employees by Department',
+          'View all employees by manager',
+          new inquirer.Separator(),
+          'Add employee',
+          'Remove employee',
+          'Update employee role',
+          'Update employee manager',
+          new inquirer.Separator(),
+          'Add department',
+          'Update department',
+          'Remove department',
+          new inquirer.Separator(),
+          'Add role',
+          'Remove role',
+          new inquirer.Separator(),
+          'Exit'
         ],
       })
       .then((answer) => {
         switch (answer.action) {
-          case 'View':
-            viewDB();
+          case 'View all employees':
+            viewEmployees();
             break;
   
-          case 'Add':
-            addToDB();
+          case 'View all employees by role':
+            viewEmployeeRoles();
             break;
   
-          case 'Update':
-            updateDB();
+          case 'View all employees by Department':
+            viewEmployeeDepartments();
+            break;
+
+          case 'View all employees by manager':
+            viewEmployeeManagers();
+            break;
+      
+          case 'Add employee':
+            addEmployee();
+            break; 
+
+          case 'Add role':
+            addRole();
+            break;
+
+          case 'Add department':
+            addDepartment();
+            break;
+  
+          case 'Update employee role':
+            updateEmployee();
+            break;
+
+          case 'Update employee manager':
+            updateManager();
+            break;
+
+          case 'Update department':
+            updateDepartment();
+            break;
+
+          case 'Remove employee':
+            removeEmployee();
+            break;
+
+          case 'Remove role':
+            removeRole();
+            break;
+
+          case 'Remove department':
+            removeDepartment();
             break;
    
           case 'Exit':
@@ -57,165 +112,129 @@ connection.connect((err) => {
       });
   };
    
-  const viewDB = () => {
-    inquirer
-    .prompt({
-      name: 'viewing',
-      type: 'list',
-      message: 'What would you like to view?',
-      choices: [
-        'Employees',
-        'Roles',
-        'Departments',
-        'Return to Main Menu',
-        'Exit',
-      ],
-    })
-    .then((answer) => {
-      switch (answer.viewing) {
-        case 'Employees':
-          viewEmployees();
-          break;
-
-        case 'Roles':
-          viewRoles();
-          break;
-
-        case 'Departments':
-          viewDepartments();
-          break;
-
-        case 'Return to Main Menu':
-          runSearch();
-          break; 
- 
-        case 'Exit':
-          connection.end();
-          break;
-
-        default:
-          console.log(`Invalid action: ${answer.viewing}`);
-          break;
-      }
-    });
-};
-
-const addToDB = () => {
-    inquirer
-    .prompt({
-      name: 'adding',
-      type: 'list',
-      message: 'What would you like to add?',
-      choices: [
-        'Employees',
-        'Roles',
-        'Departments',
-        'Return to Main Menu',
-        'Exit',
-      ],
-    })
-    .then((answer) => {
-      switch (answer.adding) {
-        case 'Employees':
-          addEmployees();
-          break;
-
-        case 'Roles':
-          addRoles();
-          break;
-
-        case 'Departments':
-          addDepartments();
-          break;
-
-        case 'Return to Main Menu':
-          runSearch();
-          break; 
- 
-        case 'Exit':
-          connection.end();
-          break;
-
-        default:
-          console.log(`Invalid action: ${answer.adding}`);
-          break;
-      }
-    });
-};
-
-const updateDB = () => {
-    inquirer
-    .prompt({
-      name: 'updating',
-      type: 'list',
-      message: 'What would you like to update?',
-      choices: [
-        'Employees',
-        'Roles',
-        'Departments',
-        'Return to Main Menu',
-        'Exit',
-      ],
-    })
-    .then((answer) => {
-      switch (answer.updating) {
-        case 'Employees':
-          updateEmployees();
-          break;
-
-        case 'Roles':
-          updateRoles();
-          break;
-
-        case 'Departments':
-          updateDepartments();
-          break;
-
-        case 'Return to Main Menu':
-          runSearch();
-          break; 
- 
-        case 'Exit':
-          connection.end();
-          break;
-
-        default:
-          console.log(`Invalid action: ${answer.updating}`);
-          break;
-      }
-    });
-};
-// TO DO: create joins for each function to allow results to be displayed 
-// viewEmployees();
+  
 const viewEmployees = () => {
     const query =
-      'SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary, departments.name FROM ((employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.department_id=departments.id));';
+     'select employees.id AS "Employee Id", CONCAT(employees.first_name, " ", employees.last_name) AS "Full Name", roles.title AS "Role", roles.salary AS "Salary", departments.name as "Department", CONCAT(managers.first_name, " ", managers.last_name) AS "Manager" from employees join roles on employees.role_id = roles.id join departments on roles.department_id = departments.id join employees managers ON employees.manager_id = managers.id order by employees.last_name ASC';
  
     connection.query(query, (err, res) => {
       if (err) throw err;
       console.table(res)
-      runSearch();
+      mainMenu();
     });
   };
   
 
-const viewRoles = () => {
-    const query =
-    'SELECT roles.id, roles.title, roles.salary, departments.name FROM roles INNER JOIN departments ON roles.department_id = departments.id;';
-
-  connection.query(query, (err, res) => {
-    if (err) throw err;
-    console.table(res)
-    runSearch();
-  });
-};
 
 
-// viewDepartments();
-// addEmployees()
-// addRoles()
-// addDepartments()
-// updateEmployees()
-// updateRoles()
-// updateDepartments()
 
+
+const viewEmployeeRoles = () => {
+    
+        connection.query('SELECT id, title FROM roles', function (error, rows) {
+    
+            const roles = rows.map(row => ({ value: row.id, name: row.title }));
+    
+            const rolesMenu = [
+                {
+                    type: 'list',
+                    name: 'role_id',
+                    message: "Choose a role:",
+                    choices: roles
+                }
+            ];
+    
+            inquirer.prompt(rolesMenu).then((answers) => {
+    
+                var query = `select roles.title AS "Role", departments.name as "Department", CONCAT(employees.first_name, " ", employees.last_name) AS "Full Name",  roles.salary AS "Salary",  CONCAT(managers.first_name, " ", managers.last_name) AS "Manager" from employees join roles on employees.role_id = roles.id join departments on roles.department_id = departments.id join employees managers ON employees.manager_id = managers.id where roles.id = ? order by employees.last_name ASC`;
+    
+                connection.query(query, [ answers.role_id ], function (error, rows ) {
+                    if (error) {
+                        console.log(error);
+                    }
+                    else {
+                        console.log("\n");
+                        console.table(rows);
+                        mainMenu();
+                    }
+                });
+    
+            });
+        });
+    }
+    
+    
+    
+
+//     inquirer
+//     .prompt({
+//         name: 'view role',
+//         type: 'list',
+//         message: 'which role would you like to look at?',
+//         choices: [...res]
+        
+        
+//     })
+//     //.then
+//     //'SELECT roles.title, employees.first_name, employees.last_name FROM ((employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.department_id=departments.id)) ORDER BY roles.id ASC';
+
+// });
+
+
+//  const viewEmployeeDepartments = () => {
+//     const query =
+//     'SELECT departments.name, employees.first_name, employees.last_name FROM ((employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.department_id=departments.id)) ORDER BY departments.id ASC';
+
+//   connection.query(query, (err, res) => {
+//     if (err) throw err;
+//     console.table(res)
+//     mainMenu();
+//   });
+// };
+
+// const addEmployee = () => {
+//         inquirer
+//         .prompt({
+//           name: 'new_first_name',
+//           type: 'input',
+//           message: 'What is the employees first name?',
+//         },
+//         {
+//           name: 'new_last_name',
+//           type: 'input',
+//           message: 'What is the employees last name?',
+         
+//         },
+//         {
+//           name: 'role',
+//           type: 'list',
+//           message: 'What is their role?',
+//           choices: 
+           
+//         })
+//         .then
+    
+
+
+
+
+
+//     const query =
+//     'INSERT INTO employee_tracker.employees (first_name, last_name, role_id, manager_id) VALUES ('Jasmine' , 'Coles', 3 , 1)';
+
+//   connection.query(query, (err, res) => {
+//     if (err) throw err;
+//     console.table(res)
+//     mainMenu();
+//   });
+// };
+
+//viewEmployeeManagers()
+// addRole()
+// addDepartment()
+// updateEmployee()
+// updateRole()
+// updateDepartment()
+// removeEmployee()
+// removeRole()
+// removeDepartment()
