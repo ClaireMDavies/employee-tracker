@@ -29,7 +29,7 @@ connection.connect((err) => {
         choices: [
           'View all employees',
           'View all employees by role',
-          'View all employees by Department',
+          'View all employees by department',
           'View all employees by manager',
           new inquirer.Separator(),
           'Add employee',
@@ -57,7 +57,7 @@ connection.connect((err) => {
             viewEmployeeRoles();
             break;
   
-          case 'View all employees by Department':
+          case 'View all employees by department':
             viewEmployeeDepartments();
             break;
 
@@ -166,31 +166,41 @@ const viewEmployeeRoles = () => {
     
     
 
-//     inquirer
-//     .prompt({
-//         name: 'view role',
-//         type: 'list',
-//         message: 'which role would you like to look at?',
-//         choices: [...res]
-        
-        
-//     })
-//     //.then
-//     //'SELECT roles.title, employees.first_name, employees.last_name FROM ((employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.department_id=departments.id)) ORDER BY roles.id ASC';
-
-// });
 
 
-//  const viewEmployeeDepartments = () => {
-//     const query =
-//     'SELECT departments.name, employees.first_name, employees.last_name FROM ((employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.department_id=departments.id)) ORDER BY departments.id ASC';
+ const viewEmployeeDepartments = () => {
+     
+    connection.query('SELECT id, name FROM departments', function (error, rows) {
+    
+        const departments = rows.map(row => ({ value: row.id, name: row.name }));
 
-//   connection.query(query, (err, res) => {
-//     if (err) throw err;
-//     console.table(res)
-//     mainMenu();
-//   });
-// };
+        const departmentsMenu = [
+            {
+                type: 'list',
+                name: 'department_id',
+                message: "Choose a department:",
+                choices: departments
+            }
+        ];
+
+        inquirer.prompt(departmentsMenu).then((answers) => {
+
+            var query = `select departments.name as "Department", roles.title AS "Role", CONCAT(employees.first_name, " ", employees.last_name) AS "Full Name",  roles.salary AS "Salary",  CONCAT(managers.first_name, " ", managers.last_name) AS "Manager" from employees join roles on employees.role_id = roles.id join departments on roles.department_id = departments.id join employees managers ON employees.manager_id = managers.id where departments.id = ? order by employees.last_name ASC`;
+
+            connection.query(query, [ answers.department_id ], function (error, rows ) {
+                if (error) {
+                    console.log(error);
+                }
+                else {
+                    console.log("\n");
+                    console.table(rows);
+                    mainMenu();
+                }
+            });
+
+        });
+    });
+}
 
 // const addEmployee = () => {
 //         inquirer
