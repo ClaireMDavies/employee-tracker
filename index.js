@@ -78,7 +78,7 @@ const mainMenu = () => {
                     break;
 
                 case 'Update employee role':
-                    updateEmployee();
+                    updateEmployeeRole();
                     break;
 
                 case 'Update employee manager':
@@ -283,7 +283,7 @@ const addEmployee = () => {
                     }
                     else {
                         viewEmployees();
-                        
+
                     }
                 });
             });
@@ -297,59 +297,59 @@ const addRole = () => {
 
         const departments = rows.map(row => ({ value: row.id, name: row.name }));
 
-        
-            const newRoleMenu = [
-                {
-                    name: 'title',
-                    type: 'input',
-                    message: 'What role would you like to add?',
-                },
-                {
-                    name: 'salary',
-                    type: 'input',
-                    message: 'What is the salary for this role?',
-                    
-                },
-                {
-                    name: 'department_id',
-                    type: 'list',
-                    message: 'What department is that in?',
-                    choices: departments
 
-                },
-           
-            ];
+        const newRoleMenu = [
+            {
+                name: 'title',
+                type: 'input',
+                message: 'What role would you like to add?',
+            },
+            {
+                name: 'salary',
+                type: 'number',
+                message: 'What is the salary for this role?',
+
+            },
+            {
+                name: 'department_id',
+                type: 'list',
+                message: 'What department is that in?',
+                choices: departments
+
+            },
+
+        ];
 
 
-            inquirer.prompt(newRoleMenu).then((answers) => {
+        inquirer.prompt(newRoleMenu).then((answers) => {
 
-                var query = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
+            var query = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
 
-                connection.query(query, [answers.title, answers.salary, answers.department_id], function (error, rows) {
-                    if (error) {
-                        console.log(error);
-                    }
-                    else {
-                        viewEmployees();
-                        
-                    }
-                });
+            connection.query(query, [answers.title, answers.salary, answers.department_id], function (error, rows) {
+                if (error) {
+                    console.log(error);
+                }
+                else {
+                    viewEmployees();
+
+                }
             });
         });
-    
+    });
+
 }
 
 
 
 const addDepartment = () => {
-            
+
     const newDepartmentMenu = [
         {
             name: 'name',
             type: 'input',
             message: 'What department would you like to add?',
         },
-                         
+
     ];
     inquirer.prompt(newDepartmentMenu).then((answers) => {
         var query = `INSERT INTO departments (name) VALUES (?)`;
@@ -360,15 +360,65 @@ const addDepartment = () => {
             }
             else {
                 viewEmployees();
-                     
+
             }
         });
     });
-    
+
 }
 
 
-// updateRole()
+
+const updateEmployeeRole = () => {
+
+    connection.query('SELECT id, CONCAT (first_name, " ", last_name) AS full_name FROM employees;', function (error, rows) {
+
+        const employees = rows.map(row => ({ value: row.id, name: row.full_name }));
+
+
+
+        connection.query('SELECT roles.id, title, departments.name As department FROM roles JOIN departments ON roles.department_id = departments.id;', function (error, rows) {
+
+            const roles = rows.map(row => ({ value: row.id, name: `${row.title} (${row.department})` }));
+
+
+            const updateEmployeeRoleMenu = [
+                {
+                    name: 'employee_id',
+                    type: 'list',
+                    message: 'Which employee would you like to update?',
+                    choices: employees
+                },
+                {
+                    name: 'role_id',
+                    type: 'list',
+                    message: 'What is their new role?',
+                    choices: roles
+                },
+
+
+            ];
+
+
+            inquirer.prompt(updateEmployeeRoleMenu).then((answers) => {
+
+                var query = `UPDATE employees SET role_id = ? WHERE id = ? `;
+
+                connection.query(query, [answers.role_id, answers.employee_id], function (error, rows) {
+                    if (error) {
+                        console.log(error);
+                    }
+                    else {
+                        viewEmployees();
+
+                    }
+                });
+            });
+        });
+    });
+
+
+}
 
 
 
