@@ -202,6 +202,39 @@ const viewEmployeeRoles = () => {
     });
 }
 
+const viewEmployeeManagers = () => {
+     
+    connection.query('SELECT DISTINCT managers.id, CONCAT(managers.first_name, " ", managers.last_name) AS "full_name" FROM employees join employees managers ON employees.manager_id = managers.id;', function (error, rows) {
+    
+        const managers = rows.map(row => ({ value: row.id, name: `${row.full_name}`}));
+
+        const managersMenu = [
+            {
+                type: 'list',
+                name: 'manager_id',
+                message: "Choose a manager:",
+                choices: managers
+            }
+        ];
+
+        inquirer.prompt(managersMenu).then((answers) => {
+
+            var query = `SELECT CONCAT(managers.first_name, " ", managers.last_name) AS "Manager", departments.name AS "Department", roles.title AS "Role", CONCAT(employees.first_name, " ", employees.last_name) AS "Full Name",  roles.salary AS "Salary" FROM employees JOIN roles ON employees.role_id = roles.id JOIN departments ON roles.department_id = departments.id JOIN employees managers ON employees.manager_id = managers.id WHERE managers.id = ? ORDER BY employees.last_name ASC`;
+
+            connection.query(query, [ answers.manager_id ], function (error, rows ) {
+                if (error) {
+                    console.log(error);
+                }
+                else {
+                    console.log("\n");
+                    console.table(rows);
+                    mainMenu();
+                }
+            });
+
+        });
+    });
+}
 // const addEmployee = () => {
 //         inquirer
 //         .prompt({
