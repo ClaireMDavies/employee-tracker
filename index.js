@@ -291,11 +291,7 @@ const addEmployee = () => {
     });
 }
 
-
-
-
-
-
+//Adding a new role
 const addRole = () => {
     connection.query('SELECT id, name FROM departments', function (error, rows) {
 
@@ -344,7 +340,34 @@ const addRole = () => {
 }
 
 
-// addDepartment()
+
+const addDepartment = () => {
+            
+    const newDepartmentMenu = [
+        {
+            name: 'name',
+            type: 'input',
+            message: 'What department would you like to add?',
+        },
+                         
+    ];
+    inquirer.prompt(newDepartmentMenu).then((answers) => {
+        var query = `INSERT INTO departments (name) VALUES (?)`;
+
+        connection.query(query, [answers.name], function (error, rows) {
+            if (error) {
+                console.log(error);
+            }
+            else {
+                viewEmployees();
+                     
+            }
+        });
+    });
+    
+}
+
+
 // updateRole()
 
 
