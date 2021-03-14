@@ -82,7 +82,7 @@ const mainMenu = () => {
                     break;
 
                 case 'Update employee manager':
-                    updateManager();
+                    updateEmployeeManager();
                     break;
 
                 case 'Update department':
@@ -420,10 +420,57 @@ const updateEmployeeRole = () => {
 
 }
 
+const updateEmployeeManager = () => {
+
+    connection.query('SELECT id, CONCAT (first_name, " ", last_name) AS full_name FROM employees;', function (error, rows) {
+
+        const employees = rows.map(row => ({ value: row.id, name: row.full_name }));
+
+            const employeeSelectionMenu = [
+                {
+                    name: 'employee_id',
+                    type: 'list',
+                    message: 'Which employee needs their manager changing?',
+                    choices: employees
+                },
+                
+            ];
 
 
+            inquirer.prompt(employeeSelectionMenu).then((answers) => {
 
-// updateEmployee()
+                const managers = employees.filter(employee => employee.value != answers.employee_id);
+
+            const managerSelectionMenu = [
+                {
+                    type: 'list',
+                    name: 'manager_id',
+                    message: "Choose a new manager:",
+                    choices: managers
+                }
+            ];
+
+            inquirer.prompt(managerSelectionMenu).then((managerAnswers) => {
+
+                var query = 'UPDATE employees SET manager_id = ? WHERE id = ?';
+
+                connection.query(query, [managerAnswers.manager_id, answers.employee_id], function (error) {
+                    if (error) {
+                        console.log(error);
+                    }
+                    else {
+                        viewEmployees();
+
+                
+
+                    }
+                });
+            });
+        });
+    });
+
+
+}
 
 // updateDepartment()
 // removeEmployee()
