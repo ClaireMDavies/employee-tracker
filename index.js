@@ -473,11 +473,12 @@ const updateEmployeeManager = () => {
 const removeEmployee = () => {
     connection.query('SELECT id, CONCAT (first_name, " ", last_name) AS full_name FROM employees', function (error, rows) {
 
-        const employees = rows.map(row => ({ value: row.id, name: row.full_name }));
+        const employees = rows.map(row => ({ value: row.id, name: `ID ${row.id}: ${row.full_name}` }));
+        employees.push("Exit");
 
         const removeEmployeeMenu = [
             {
-                name: 'full_name',
+                name: 'employee_id',
                 type: 'list',
                 message: 'Which employee has left the company?',
                 choices: employees
@@ -488,23 +489,33 @@ const removeEmployee = () => {
 
         inquirer.prompt(removeEmployeeMenu).then((answers) => {
 
-            var query = `DELETE FROM employees WHERE id = ?;`;
+            if (answers.employee_id != "Exit") {
 
-            connection.query(query, [answers.id], function (error, rows) {
-                if (error) {
-                    console.log(error);
-                }
-                else {
-                    console.log("employee deleted");
-                    viewEmployees();
+                var query = `DELETE FROM employees WHERE id = ?;`;
 
-                }
-            });
+                connection.query(query, [answers.employee_id], function (error, rows) {
+                    if (error) {
+                        console.log(error);
+                    }
+                    else {
+                        console.log("employee deleted");
+                        viewEmployees();
+
+                    }
+                
+                });
+            }
+            else {
+
+                viewEmployees();
+            }
         });
     });
 
 }
 
-// ()
-// removeRole()
+
+// removing role
+
+
 // removeDepartment()
