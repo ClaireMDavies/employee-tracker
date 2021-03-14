@@ -85,10 +85,6 @@ const mainMenu = () => {
                     updateEmployeeManager();
                     break;
 
-                case 'Update department':
-                    updateDepartment();
-                    break;
-
                 case 'Remove employee':
                     removeEmployee();
                     break;
@@ -112,7 +108,7 @@ const mainMenu = () => {
         });
 };
 
-
+//creating a table that shows all information, ordered by employee surname
 const viewEmployees = () => {
     const query =
         'select employees.id AS "Employee Id", CONCAT(employees.first_name, " ", employees.last_name) AS "Full Name", roles.title AS "Role", roles.salary AS "Salary", departments.name as "Department", CONCAT(managers.first_name, " ", managers.last_name) AS "Manager" from employees join roles on employees.role_id = roles.id join departments on roles.department_id = departments.id join employees managers ON employees.manager_id = managers.id order by employees.last_name ASC';
@@ -127,7 +123,7 @@ const viewEmployees = () => {
 
 
 
-
+//creating a table to view the employees associated with a particular role, along with other associated information. 
 
 const viewEmployeeRoles = () => {
 
@@ -167,7 +163,7 @@ const viewEmployeeRoles = () => {
 
 
 
-
+// creating a table to view all employees in a particaulr department, along with their associated information
 const viewEmployeeDepartments = () => {
 
     connection.query('SELECT id, name FROM departments', function (error, rows) {
@@ -202,6 +198,7 @@ const viewEmployeeDepartments = () => {
     });
 }
 
+// creating a table to view employees by who they are managed by
 const viewEmployeeManagers = () => {
 
     connection.query('SELECT DISTINCT managers.id, CONCAT(managers.first_name, " ", managers.last_name) AS "full_name" FROM employees join employees managers ON employees.manager_id = managers.id;', function (error, rows) {
@@ -340,7 +337,7 @@ const addRole = () => {
 }
 
 
-
+//adding a new department
 const addDepartment = () => {
 
     const newDepartmentMenu = [
@@ -368,7 +365,7 @@ const addDepartment = () => {
 }
 
 
-
+// updating an employees role
 const updateEmployeeRole = () => {
 
     connection.query('SELECT id, CONCAT (first_name, " ", last_name) AS full_name FROM employees;', function (error, rows) {
@@ -420,26 +417,27 @@ const updateEmployeeRole = () => {
 
 }
 
+//updating an employees manager, and ensuring an employee cannot be their own manager
 const updateEmployeeManager = () => {
 
     connection.query('SELECT id, CONCAT (first_name, " ", last_name) AS full_name FROM employees;', function (error, rows) {
 
         const employees = rows.map(row => ({ value: row.id, name: row.full_name }));
 
-            const employeeSelectionMenu = [
-                {
-                    name: 'employee_id',
-                    type: 'list',
-                    message: 'Which employee needs their manager changing?',
-                    choices: employees
-                },
-                
-            ];
+        const employeeSelectionMenu = [
+            {
+                name: 'employee_id',
+                type: 'list',
+                message: 'Which employee needs their manager changing?',
+                choices: employees
+            },
+
+        ];
 
 
-            inquirer.prompt(employeeSelectionMenu).then((answers) => {
+        inquirer.prompt(employeeSelectionMenu).then((answers) => {
 
-                const managers = employees.filter(employee => employee.value != answers.employee_id);
+            const managers = employees.filter(employee => employee.value != answers.employee_id);
 
             const managerSelectionMenu = [
                 {
@@ -461,7 +459,7 @@ const updateEmployeeManager = () => {
                     else {
                         viewEmployees();
 
-                
+
 
                     }
                 });
@@ -471,8 +469,42 @@ const updateEmployeeManager = () => {
 
 
 }
+// removing  employee
+const removeEmployee = () => {
+    connection.query('SELECT id, CONCAT (first_name, " ", last_name) AS full_name FROM employees', function (error, rows) {
 
-// updateDepartment()
-// removeEmployee()
+        const employees = rows.map(row => ({ value: row.id, name: row.full_name }));
+
+        const removeEmployeeMenu = [
+            {
+                name: 'full_name',
+                type: 'list',
+                message: 'Which employee has left the company?',
+                choices: employees
+            },
+
+        ];
+
+
+        inquirer.prompt(removeEmployeeMenu).then((answers) => {
+
+            var query = `DELETE FROM employees WHERE id = ?;`;
+
+            connection.query(query, [answers.id], function (error, rows) {
+                if (error) {
+                    console.log(error);
+                }
+                else {
+                    console.log("employee deleted");
+                    viewEmployees();
+
+                }
+            });
+        });
+    });
+
+}
+
+// ()
 // removeRole()
 // removeDepartment()
