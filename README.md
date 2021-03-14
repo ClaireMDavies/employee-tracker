@@ -25,7 +25,7 @@ A screenshot
 
 Video of the application in use:
 
-![video link](https://drive.google.com/file/d/13UYbYlhI3aWNIWkWd4mKHETiawh8v55Q/view)
+[video link](https://drive.google.com/file/d/13UYbYlhI3aWNIWkWd4mKHETiawh8v55Q/view?usp=sharing)
 
 ## License
 License with MIT
