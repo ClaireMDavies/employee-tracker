@@ -21,9 +21,11 @@ Initiate the app by opening the terminal, and running npm install, followed by n
 Follow the prompts in the terminal and select from the menus that are presented to you to query the database as you see fit.
 
 A screenshot 
-![]()
+![employee-tracker.png](employee-tracker.png)
 
 Video of the application in use:
+
+![video link](https://drive.google.com/file/d/13UYbYlhI3aWNIWkWd4mKHETiawh8v55Q/view)
 
 ## License
 License with MIT
