@@ -216,7 +216,7 @@ const viewEmployeeManagers = () => {
 
         inquirer.prompt(managersMenu).then((answers) => {
 
-            var query = `SELECT CONCAT(managers.first_name, " ", managers.last_name) AS "Manager", departments.name AS "Department", roles.title AS "Role", CONCAT(employees.first_name, " ", employees.last_name) AS "Full Name",  roles.salary AS "Salary" FROM employees JOIN roles ON employees.role_id = roles.id JOIN departments ON roles.department_id = departments.id JOIN employees managers ON employees.manager_id = managers.id WHERE managers.id = ? ORDER BY employees.last_name ASC`;
+            var query = `SELECT CONCAT(managers.first_name, " ", managers.last_name) AS "Manager", departments.name AS "Department", roles.title AS "Role", CONCAT(employees.first_name, " ", employees.last_name) AS "Employee Name",  roles.salary AS "Salary" FROM employees JOIN roles ON employees.role_id = roles.id JOIN departments ON roles.department_id = departments.id JOIN employees managers ON employees.manager_id = managers.id WHERE managers.id = ? ORDER BY employees.last_name ASC`;
 
             connection.query(query, [answers.manager_id], function (error, rows) {
                 if (error) {
@@ -516,6 +516,55 @@ const removeEmployee = () => {
 
 
 // removing role
+const removeRole = () => {
+    connection.query('SELECT roles.id, roles.title, name AS department FROM roles JOIN departments ON roles.department_id = departments.id', function (error, rows) {
 
+        const roles = rows.map(row => ({ value: row.id, name: `${row.title} ${row.department}` }));
+        roles.push("Exit");
+
+        const removeRoleMenu = [
+            {
+                name: 'role_id',
+                type: 'list',
+                message: 'Which role is now obsolete?',
+                choices: roles
+            },
+
+        ];
+
+
+        inquirer.prompt(removeRoleMenu).then((answers) => {
+
+            if (answers.role_id != "Exit") {
+                
+                var query = `SELECT * FROM employees WHERE role_id = ?`;
+                
+                connection.query(query, [answers.role_id], function (error, rows) {
+
+                    if (rows.length > 0) {
+                        console.error("this would make people redundant as this role is in use.  Role not deleted");
+                        mainMenu();
+                    }
+                    else {
+                        var query = 'DELETE FROM roles WHERE id = ?';
+
+                        connection.query(query, [answers.role_id], function (error, rows) {
+                            if (error) {
+                                console.log(error);
+                            }
+                            else {
+                                console.log("Role deleted");
+                                viewEmployees();
+                            }
+                        });
+
+                    }
+                });
+            }
+           
+        });
+    });
+
+}
 
 // removeDepartment()
