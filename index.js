@@ -44,6 +44,7 @@ const mainMenu = () => {
                 'Add role',
                 'Remove role',
                 new inquirer.Separator(),
+                'Department Budget',
                 'Exit'
             ],
         })
@@ -96,6 +97,10 @@ const mainMenu = () => {
                 case 'Remove department':
                     removeDepartment();
                     break;
+
+                case 'Department Budget':
+                    showDepartmentBudgets();
+                    break; 
 
                 case 'Exit':
                     connection.end();
@@ -567,4 +572,90 @@ const removeRole = () => {
 
 }
 
-// removeDepartment()
+// removing department
+const removeDepartment = () => {
+    connection.query('SELECT id, name FROM departments', function (error, rows) {
+
+        const departments = rows.map(row => ({ value: row.id, name: row.name }));
+        departments.push("Exit");
+
+        const removeDepartmentMenu = [
+            {
+                name: 'department_id',
+                type: 'list',
+                message: 'Which department is now obsolete?',
+                choices: departments
+            },
+
+        ];
+
+
+        inquirer.prompt(removeDepartmentMenu).then((answers) => {
+
+            if (answers.department_id != "Exit") {
+                
+                var query = `SELECT * FROM roles WHERE department_id = ?`;
+                
+                connection.query(query, [answers.department_id], function (error, rows) {
+
+                    if (rows.length > 0) {
+                        console.error("this would make people redundant as this department is in use.  Department not deleted");
+                        mainMenu();
+                    }
+                    else {
+                        var query = 'DELETE FROM departments WHERE id = ?';
+
+                        connection.query(query, [answers.department_id], function (error, rows) {
+                            if (error) {
+                                console.log(error);
+                            }
+                            else {
+                                console.log("department deleted");
+                                viewEmployees();
+                            }
+                        });
+
+                    }
+                });
+            }
+           
+        });
+    });
+
+}
+
+const showDepartmentBudgets = () => {
+
+    connection.query('SELECT id, name FROM departments', function (error, rows) {
+
+        const departments = rows.map(row => ({ value: row.id, name: row.name }));
+
+        const showDepartmentsMenu = [
+            {
+                name: 'department_id',
+                type: 'list',
+                message: 'Which department budget do you want to see?',
+                choices: departments
+            },
+
+        ];
+
+        inquirer.prompt(showDepartmentsMenu).then((answers) => {
+
+            var query =`SELECT departments.name AS Department, SUM(salary) AS Budget FROM employees JOIN roles  ON employees.role_id = roles.id JOIN departments ON roles.department_id = departments.id WHERE department_id = ?`;
+
+            connection.query(query, [answers.department_id], function (error, rows) {
+                if (error) {
+                    console.log(error);
+                }
+                else {
+                    console.log("\n");
+                    console.table(rows);
+                    mainMenu();
+                }
+            });
+
+        });
+    });
+}
+    
